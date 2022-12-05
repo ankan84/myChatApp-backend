@@ -12,9 +12,6 @@ const list=mongoose.Schema({
     
     }
 
-
-
-
 })
 
 const Data=mongoose.model("chatBox",list);
