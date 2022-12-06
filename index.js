@@ -1,17 +1,19 @@
 const express = require('express');
 const app = express();
 const cors =require('cors')
+
 app.use(express.json())
 app.use(cors())
 
 
+
 const PORT = process.env.PORT || 5000;
 
-require('./db/conn')
+const connection=require('./db/conn')
 
 const Data = require('./schema/schema');
-const mongoose= require('mongoose');
-const { json } = require('express');
+
+
 
 
 
@@ -19,34 +21,45 @@ const { json } = require('express');
 
 
 app.get('/',(req,res)=>{
-    res.send("applicatio working...")
+
+    res.send("application running....")
+    
 })
 
 
 
+app.post('/create',(req,res)=>{
+     connection.query(`create table chatApp(
+        name varchar(20),
+        message varchar(2000000000)
+    )`
+     ,(err,result)=>{
+         if(err){
+            res.status(400).send(err)
+         }else{
+            res.status(201).send(result)
+         }
+     })
+
+})
+
 app.post("/chat", async (req, res) => {
 
-    const { name, message } = req.body;
+    const { name,message} = req.body;
+
+
+
+    connection.query(`insert into chatApp(name,message) values ('${name}','${message}')`,(err,result)=>{
+
+        if(err){
+            res.status(400).send(err)
+        }else{
+            res.status(201).send(result)
+        }
+    })
     
 
-    try {
-        const data = new Data({
-            name, message
-        })
-        const response = await data.save();
-        if (response) {
-            res.status(200).json(response)
-
-        }
-        else {
-            res.status(400).json()
-
-        }
-    } catch (e) {
-        res.status(400).json()
-
-
-    }
+   
 
 })
 
@@ -55,18 +68,14 @@ app.get('/chat', async (req, res) => {
 
 
 
-    try {
-        const response = await Data.find({});
-
-        if (response) {
-            res.status(200).json(response)
-        } else {
-            res.status(400).json({})
+    connection.query('select * from chatApp',(err,result)=>{
+        if(err){
+            res.status(500).send()
+        }else{
+            res.status(200).send(result)
         }
+    })
 
-    } catch (e) {
-        res.status(400).json({})
-    }
 
 })
 
